@@ -10,7 +10,7 @@ import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailService {
-
+  
     @Autowired
     private JavaMailSender javaMailSender;
 

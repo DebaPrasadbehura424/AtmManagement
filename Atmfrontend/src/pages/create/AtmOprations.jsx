@@ -3,9 +3,15 @@ import { NavLink } from "react-router-dom";
 import atmback from "../utils/atmimg.jpg";
 
 function AtmOperations() {
+  const handleExtract = () => {
+    new Audio(insert).play();
+    setTimeout(() => {
+      navigate("/login");
+    }, 6000);
+  };
+
   return (
     <div className="atm-operations-container relative flex justify-center items-center h-screen overflow-hidden perspective-800">
-      {" "}
       <div className="absolute inset-0">
         <img
           src={atmback}
@@ -14,7 +20,7 @@ function AtmOperations() {
         />
       </div>
       <div className="absolute inset-0 bg-black opacity-50"></div>
-      <div className="atm-operations-content  relative p-10 rounded-[10px] shadow-lg w-[31%] h-83 mb-20 mr-[16%] z-10 transform-style-3d preserve-3d  rotate-x-12">
+      <div className="atm-operations-content relative p-10 rounded-[10px] shadow-lg w-[31%] h-83 mb-20 mr-[16%] z-10 transform-style-3d preserve-3d rotate-x-12">
         <div className="grid grid-cols-2 gap-4">
           <NavLink to="/withdraw">
             <button className=" opacity-[0.5] hover:opacity-[1] text-white border-2 border-gray-300 font-bold py-2 px-14 rounded cursor-pointer">
@@ -65,6 +71,19 @@ function AtmOperations() {
               Back
             </button>
           </NavLink>
+        </div>
+        <div className="mt-4 text-center">
+          <button
+            className="bg-darkred text-white font-bold py-2 px-12 rounded cursor-pointer bg-red-800"
+            onClick={handleExtract}
+          >
+            Extract ATM
+          </button>
+        </div>
+      </div>
+      <div className="absolute bottom-5 w-full text-center">
+        <div className="text-white text-sm">
+          &copy; 2025 ATM Operations. All Rights Reserved.
         </div>
       </div>
     </div>
