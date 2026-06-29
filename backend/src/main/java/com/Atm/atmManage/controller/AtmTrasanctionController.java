@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +16,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/atmBalance")
 public class AtmTrasanctionController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    AtmTrasanctionController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/balanceEnquiry/{token}")
     public ResponseEntity<?> getBalanceEnquiry(@PathVariable String token) {
@@ -41,7 +43,7 @@ public class AtmTrasanctionController {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
 
-            List<Transaction> transactionList = dummyUser.getTrsanctionList();
+            List<Transaction> transactionList = dummyUser.getTransactionList();
             if (transactionList == null) {
                 transactionList = new ArrayList<>();
             }
@@ -49,8 +51,8 @@ public class AtmTrasanctionController {
             double newDeposit = depositAmount;
             dummyUser.setBalance(oldBlance + newDeposit);
             transactionList.add(new Transaction("Deposit", newDeposit, LocalDateTime.now()));
-            dummyUser.setTrsanctionList(transactionList);
-            userService.CreateAtmCard(dummyUser);
+            dummyUser.setTransactionList(transactionList);
+            userService.saveUser(dummyUser);
 
             return new ResponseEntity<>(dummyUser.getBalance(), HttpStatus.ACCEPTED);
 
@@ -78,7 +80,7 @@ public class AtmTrasanctionController {
                 return new ResponseEntity<>("Enter valid amount", HttpStatus.NOT_ACCEPTABLE);
             }
 
-            List<Transaction> transactionList = dummyUser.getTrsanctionList();
+            List<Transaction> transactionList = dummyUser.getTransactionList();
             if (transactionList == null) {
                 transactionList = new ArrayList<>();
             }
@@ -86,7 +88,7 @@ public class AtmTrasanctionController {
                 dummyUser.setBalance(oldBlance - newDeposit);
 
                 transactionList.add(new Transaction("WithDraw", newDeposit, LocalDateTime.now()));
-                userService.CreateAtmCard(dummyUser);
+                userService.saveUser(dummyUser);
                 return new ResponseEntity<>(dummyUser.getBalance(), HttpStatus.ACCEPTED);
             } else {
                 return new ResponseEntity<>("You have not that much money", HttpStatus.NOT_ACCEPTABLE);
@@ -122,7 +124,7 @@ public class AtmTrasanctionController {
             return new ResponseEntity<>("Your reciever not found", HttpStatus.NOT_ACCEPTABLE);
         }
 
-        List<Transaction> transactionList = senderUser.getTrsanctionList();
+        List<Transaction> transactionList = senderUser.getTransactionList();
         if (transactionList == null) {
             transactionList = new ArrayList<>();
         }
@@ -135,8 +137,8 @@ public class AtmTrasanctionController {
 
             transactionList.add(new Transaction("Transfer", RecieverAcceptMoney, LocalDateTime.now()));
 
-            userService.CreateAtmCard(senderUser);
-            userService.CreateAtmCard(RecieveAlldetailsAccount);
+            userService.saveUser(senderUser);
+            userService.saveUser(RecieveAlldetailsAccount);
             return new ResponseEntity<>(senderUser, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -171,7 +173,7 @@ public class AtmTrasanctionController {
             }
             String newpin = newUser.getPin();
             changePinUser.setPin(newpin);
-            userService.CreateAtmCard(changePinUser);
+            userService.saveUser(changePinUser);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             System.out.println(e);
@@ -196,14 +198,14 @@ public class AtmTrasanctionController {
                 return new ResponseEntity<>("Enter valid amount", HttpStatus.NOT_ACCEPTABLE);
             }
 
-            List<Transaction> transactionList = dummyUser.getTrsanctionList();
+            List<Transaction> transactionList = dummyUser.getTransactionList();
             if (transactionList == null) {
                 transactionList = new ArrayList<>();
             }
             if (newDeposit <= oldBlance && oldBlance != 0) {
                 dummyUser.setBalance(oldBlance - newDeposit);
                 transactionList.add(new Transaction("Recharge", newDeposit, LocalDateTime.now()));
-                userService.CreateAtmCard(dummyUser);
+                userService.saveUser(dummyUser);
                 return new ResponseEntity<>(dummyUser.getBalance(), HttpStatus.ACCEPTED);
             } else {
                 return new ResponseEntity<>("You have not that much money", HttpStatus.NOT_ACCEPTABLE);

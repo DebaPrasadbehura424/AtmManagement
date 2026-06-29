@@ -1,6 +1,5 @@
 package com.Atm.atmManage.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +13,11 @@ import lombok.Data;
 @RequestMapping("/api/email")
 public class EmailController {
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
+
+    EmailController(EmailService emailService) {
+        this.emailService = emailService;
+    }
 
     @PostMapping("/send")
     public ResponseEntity<?> sendEmail(@RequestBody EmailRequest emailRequest) {
