@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import Home from "./pages/other/Home";
+import Home from "./pages/main/Home";
 import Choose from "./pages/operation/Choose";
 import CreateAtm from "./pages/create/CreateAtm";
 import Atm from "./pages/create/Atm";
@@ -17,11 +17,16 @@ import ChangePin from "./pages/operation/ChangePin";
 import MobileRecharge from "./pages/operation/MobileRecharge";
 import TransactionHistory from "./pages/transaction/TrsactionHistory";
 import ForgetPassword from "./pages/operation/ForgetPassword";
+import Bank from "./pages/main/Bank";
+import Cashier from "./pages/main/MayIHelpYou";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/bank" element={<Bank />} />
+      <Route path="/MAY I HELP YOU?" element={<Cashier />} />
+
       <Route path="/choose" element={<Choose />} />
 
       <Route path="/insertcard" element={<InsertCard />} />

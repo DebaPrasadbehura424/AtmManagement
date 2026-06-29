@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import axios from "axios";
-import bankLogo from "../utils/banklogo.png";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import fail from "../audios/fail.mp3";
@@ -66,7 +65,7 @@ function CreateAtm() {
         <div className="flex justify-start mb-6">
           {" "}
           {/* Align logo to the left */}
-          <img src={bankLogo} alt="Bank Logo" className="w-20 h-20 mr-4" />
+          {/* <img src={bankLogo} alt="Bank Logo" className="w-20 h-20 mr-4" /> */}
           <h1 className="text-2xl font-bold text-white">Create ATM Account</h1>
         </div>
 
