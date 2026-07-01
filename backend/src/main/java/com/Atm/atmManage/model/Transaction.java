@@ -20,6 +20,9 @@ public class Transaction {
     private String transactionType;
 
     @Column(nullable = false)
+    private String mode;
+
+    @Column(nullable = false)
     private Double transactionAmount;
 
     @Column(nullable = false)
@@ -30,6 +33,7 @@ public class Transaction {
     private User user;
 
     public Transaction(String transactionType,
+            String mode,
             Double transactionAmount,
             LocalDateTime transactionDate) {
         this.transactionType = transactionType;

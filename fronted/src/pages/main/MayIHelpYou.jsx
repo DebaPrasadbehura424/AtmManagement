@@ -1,18 +1,57 @@
 import React, { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { motion, useAnimate } from "framer-motion";
 import bg from "../utils/bg.png";
-import girl from "../utils/girl.png";
 import girl0 from "../utils/girl0.png";
 
 function MayIHelpYou() {
-  const [girlImage, setGirlImage] = useState(girl);
+  const [girlImage, setGirlImage] = useState(girl0);
   const blinkInterval = useRef(null);
+  const navigate = useNavigate(null);
 
   const [currentText, setCurrentText] = useState("");
   const [over, setOver] = useState(true);
   const [task, setTask] = useState("welcome");
-  const [showSubMenu, setShowSubMenu] = useState(false);
-  const [subTask, setSubTask] = useState(null);
+  const [subTask, setSubTask] = useState("");
+  const [subMenu, setSubMenu] = useState();
+
+  const subMenuContent = {
+    bankbook: [
+      {
+        key: "createAccount",
+        label: "Create New Account",
+        emoji: "➕",
+        color: "emerald",
+      },
+      {
+        key: "editAccount",
+        label: "Edit Account Details",
+        emoji: "✏️",
+        color: "amber",
+      },
+      {
+        key: "deleteAccount",
+        label: "Delete / Close Account",
+        emoji: "🗑️",
+        color: "red",
+      },
+    ],
+
+    atm: [
+      {
+        key: "createAtm",
+        label: "Apply for New ATM Card",
+        emoji: "💳",
+        color: "blue",
+      },
+      {
+        key: "issueAtm",
+        label: "Issue / Replace ATM Card",
+        emoji: "🏧",
+        color: "green",
+      },
+    ],
+  };
 
   const dialogues = {
     welcome: "Hello! Good Morning. How can I help you today?",
@@ -29,18 +68,11 @@ function MayIHelpYou() {
       "I understand. For account deletion, we need to follow some formalities. Are you sure?",
   };
 
-  // Blinking
-  useEffect(() => {
-    blinkInterval.current = setInterval(() => {
-      setGirlImage((prev) => (prev === girl ? girl0 : girl));
-    }, 2600);
-    return () => clearInterval(blinkInterval.current);
-  }, []);
-
   // Typewriter Effect
-  const typeWriter = (text) => {
+  // Reliable Typewriter with Callback
+  const typeWriter = (text, onComplete = null) => {
     setCurrentText("");
-    setOver(true);
+
     let i = 0;
     const interval = setInterval(() => {
       if (i < text.length) {
@@ -48,34 +80,40 @@ function MayIHelpYou() {
         i++;
       } else {
         clearInterval(interval);
+
+        // Final cleanup and callback
         setTimeout(() => {
-          setOver(false); // Text finished
-        }, 600);
+          if (onComplete) {
+            onComplete();
+          }
+          setOver(false);
+        }, 800);
       }
     }, 50);
   };
 
   const handleTask = (newTask) => {
-    setShowSubMenu(false);
-    setSubTask(null);
     setTask(newTask);
-
-    if (newTask === "bankbook") {
-      setShowSubMenu(true);
-      setCurrentText("");
-      setOver(false);
-    } else {
-      typeWriter(dialogues[newTask]);
-    }
+    setSubTask(newTask);
+    setSubMenu(subMenuContent[newTask]);
   };
 
-  const handleSubTask = (action) => {
-    setShowSubMenu(false);
-    setSubTask(action);
-    typeWriter(dialogues[action]);
+  const handleSubTask = (key) => {
+    setTask(null);
+    setSubTask("");
+    setOver(true);
+    const message = dialogues[key];
+
+    typeWriter(dialogues[key], () => {
+      console.log("✅ Typewriter finished! Navigating now...", key);
+
+      if (key === "createAccount") {
+        navigate("/accountPage");
+      }
+      // Add more conditions here later
+    });
   };
 
-  // Initial welcome
   useEffect(() => {
     typeWriter(dialogues.welcome);
   }, []);
@@ -115,7 +153,6 @@ function MayIHelpYou() {
         </div>
       </div>
 
-      {/* Speech Bubble - Only show while typing */}
       {over && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8, y: 50 }}
@@ -132,8 +169,8 @@ function MayIHelpYou() {
         </motion.div>
       )}
 
-      {/* Main Buttons - Show when text is finished or in submenu */}
-      {!over && !showSubMenu && !subTask && (
+      {/* Main Buttons*/}
+      {task != null && (
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 grid grid-cols-2 gap-4 w-[520px]">
           <button
             onClick={() => handleTask("bankbook")}
@@ -162,44 +199,25 @@ function MayIHelpYou() {
         </div>
       )}
 
-      {/* Bank Book Submenu */}
-      {showSubMenu && (
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 w-[520px]"
-        >
+      {subTask != "" && subMenu.length != 0 && (
+        <motion.div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 w-[520px]">
           <div className="bg-zinc-900 border-4 border-yellow-400 p-8 rounded-3xl">
-            <h2 className="text-yellow-300 text-2xl font-bold text-center mb-8">
-              BANK BOOK SERVICES
-            </h2>
-            <div className="grid grid-cols-1 gap-4">
-              <button
-                onClick={() => handleSubTask("createAccount")}
-                className="p-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-all active:scale-95 text-lg"
-              >
-                ➕ Create New Account
-              </button>
-              <button
-                onClick={() => handleSubTask("editAccount")}
-                className="p-5 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-semibold transition-all active:scale-95 text-lg"
-              >
-                ✏️ Edit Account Details
-              </button>
-              <button
-                onClick={() => handleSubTask("deleteAccount")}
-                className="p-5 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-semibold transition-all active:scale-95 text-lg"
-              >
-                🗑️ Delete / Close Account
-              </button>
+            <div className="grid gap-4">
+              {subMenu.map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => handleSubTask(item.key)}
+                  className={`p-5 rounded-2xl bg-${item.color}-600 hover:bg-${item.color}-700 
+                       text-white font-semibold transition-all active:scale-95 text-lg flex items-center gap-3`}
+                >
+                  <span className="text-2xl">{item.emoji}</span>
+                  {item.label}
+                </button>
+              ))}
             </div>
 
             <button
-              onClick={() => {
-                setShowSubMenu(false);
-                setSubTask(null);
-                typeWriter(dialogues.welcome);
-              }}
+              onClick={() => window.history.back()}
               className="mt-6 w-full p-4 rounded-2xl border-2 border-white text-white hover:bg-white hover:text-black transition-all font-bold"
             >
               ← Back to Main Menu

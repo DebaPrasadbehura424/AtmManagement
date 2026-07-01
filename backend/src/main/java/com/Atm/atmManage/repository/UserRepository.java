@@ -3,7 +3,6 @@ package com.Atm.atmManage.repository;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.Atm.atmManage.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -13,7 +12,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByAadharNumber(String aadharNumber);
 
     Optional<User> findByAccountNumber(String accountNumber);
-
-    Optional<User> findByToken(String token);
 
 }

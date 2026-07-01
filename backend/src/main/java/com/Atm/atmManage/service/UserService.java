@@ -31,7 +31,7 @@ public class UserService {
         }
     }
 
-    // Check Aadhar Exists
+    // Check Aaadhar Exists
     public boolean checkAadharExistOrNot(String aadharNumber) {
         try {
             return userRepository.findByAadharNumber(aadharNumber).isPresent();
@@ -43,7 +43,6 @@ public class UserService {
 
     // Generate 16-digit Account Number
     public String getAccountNumberFromService() {
-
         SecureRandom random = new SecureRandom();
         StringBuilder sb = new StringBuilder();
 
@@ -54,15 +53,13 @@ public class UserService {
         return sb.toString();
     }
 
-    // Get User By Aadhar
-    public User getUserByAadharCard(String aadharNumber) {
-
-        return userRepository.findByAadharNumber(aadharNumber).orElse(null);
+    // Get User By AccountNumber
+    public User getUserByAccountNumber(String accouuntNumber) {
+        return userRepository.findByAccountNumber(accouuntNumber).orElse(null);
     }
 
     // Get User By Account Number
     public User getUserExitOrNotByaccountNumber(String accountNumber) {
-
         try {
             return userRepository.findByAccountNumber(accountNumber.trim()).orElse(null);
         } catch (Exception e) {
@@ -75,12 +72,6 @@ public class UserService {
     public boolean getUserExitOrNotByaccountNumberAndPin(User user, String pin) {
 
         return user.getPin().equals(pin);
-    }
-
-    // Get User By Token
-    public User getUserByToken(String token) {
-
-        return userRepository.findByToken(token).orElse(null);
     }
 
     // Get User By Email

@@ -19,16 +19,19 @@ import TransactionHistory from "./pages/transaction/TrsactionHistory";
 import ForgetPassword from "./pages/operation/ForgetPassword";
 import Bank from "./pages/main/Bank";
 import Cashier from "./pages/main/MayIHelpYou";
+import AccountPage from "./pages/operation/AccountPage";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      {/* bank  */}
       <Route path="/bank" element={<Bank />} />
       <Route path="/MAY I HELP YOU?" element={<Cashier />} />
-
+      <Route path="/accountPage" element={<AccountPage />} />
       <Route path="/choose" element={<Choose />} />
 
+      {/* atm */}
       <Route path="/insertcard" element={<InsertCard />} />
       <Route path="/login" element={<Login />} />
       <Route path="/newpin" element={<Newpin />} />

@@ -10,7 +10,6 @@ import com.Atm.atmManage.service.UserService;
 
 import jakarta.mail.MessagingException;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -31,66 +30,39 @@ public class UserController {
         this.emailService = emailService;
     }
 
-    // Create ATM Account
-    @PostMapping("/createAtm")
-    public ResponseEntity<?> saveAtmDetails(@RequestBody User user) {
+    @PostMapping("/createAccount")
+    public ResponseEntity<String> createAccount(@RequestBody User user) {
+        String accountNumber = userService.getAccountNumberFromService();
+        user.setAccountNumber(accountNumber);
 
+        User savedUser = userService.saveUser(user);
+        String token = JwtTokenProvider.generateToken(savedUser.getAccountNumber());
+        return new ResponseEntity<>(token, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/createAtm/{accountNumber}")
+    public ResponseEntity<?> creatAtm(@RequestParam String accountNumber) {
         try {
-
-            if (user.getAadharNumber() == null || user.getAadharNumber().isEmpty()) {
-                return new ResponseEntity<>("Aadhar Number is required", HttpStatus.BAD_REQUEST);
+            User existUser = userService.getUserByAccountNumber(accountNumber);
+            if (existUser == null) {
+                return new ResponseEntity<>("Not found user", HttpStatus.NOT_FOUND);
             }
 
-            if (userService.checkAadharExistOrNot(user.getAadharNumber())) {
-                return new ResponseEntity<>("This Aadhar is already registered",
-                        HttpStatus.CONFLICT);
-            }
+            String atmNumber = userService.getAccountNumberFromService();
+            existUser.setAtmNumber(atmNumber);
 
-            String jwt = JwtTokenProvider.generateToken(user.getAadharNumber());
-
-            User newUser = new User();
-            newUser.setFirstName(user.getFirstName());
-            newUser.setLastName(user.getLastName());
-            newUser.setAddress(user.getAddress());
-            newUser.setEmail(user.getEmail());
-            newUser.setPhoneNumber(user.getPhoneNumber());
-            newUser.setAadharNumber(user.getAadharNumber());
-
-            newUser.setAccountNumber(userService.getAccountNumberFromService());
-            newUser.setCreationDateTime(LocalDateTime.now());
-            newUser.setBalance(0.0);
-            newUser.setPin("0");
-            newUser.setToken(jwt);
-
-            userService.saveUser(newUser);
-
-            return new ResponseEntity<>(newUser, HttpStatus.CREATED);
-
+            userService.saveUser(existUser);
+            return new ResponseEntity<>("Atm Created", HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    // Find user by Aadhar
-    @GetMapping("/aadharNumber/{aadharNumber}")
-    public ResponseEntity<?> getFromAadhar(@PathVariable String aadharNumber) {
-
-        User user = userService.getUserByAadharCard(aadharNumber);
-
-        if (user == null) {
-            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
-        }
-
-        return ResponseEntity.ok(user);
-    }
-
     // Login using Account Number & PIN
-    @PostMapping("/accNum/pin")
+    @PostMapping("/accnum/pin")
     public ResponseEntity<?> getUserByAccountAndPin(@RequestBody User loginUser) {
-
         try {
-
             User currentUser = userService.getUserExitOrNotByaccountNumber(
                     loginUser.getAccountNumber());
 
@@ -171,11 +143,11 @@ public class UserController {
     }
 
     // Transaction History
-    @GetMapping("/History/{token}")
+    @GetMapping("/History/{accountNumber}")
     public ResponseEntity<?> getAllTransactionHistoryOfUser(
-            @PathVariable String token) {
+            @PathVariable String accountNumber) {
 
-        User currentUser = userService.getUserByToken(token);
+        User currentUser = userService.getUserByAccountNumber(accountNumber);
 
         if (currentUser == null) {
             return new ResponseEntity<>("User not found",

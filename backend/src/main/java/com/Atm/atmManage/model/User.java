@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "atm_user")
+@Table(name = "user")
 @Data
 @NoArgsConstructor
 public class User {
@@ -24,23 +24,40 @@ public class User {
     @Column(nullable = false)
     private String lastName;
 
-    @Column(nullable = false, unique = true)
-    private String accountNumber;
+    @Column(nullable = false)
+    private String dob;
 
     @Column(nullable = false)
-    private String pin;
-
-    @Column(nullable = false)
-    private String address;
+    private String email;
 
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = false, unique = true)
-    private String aadharNumber;
+    @Column(nullable = false)
+    private String address;
 
     @Column(nullable = false, unique = true)
-    private String email;
+    private String panNumber;
+
+    @Column(nullable = false, unique = true)
+    private String aadhaarNumber;
+
+    @Column(nullable = false, unique = true)
+    private String accountNumber;
+
+    @Column(nullable = false, unique = true)
+    private String IfseCode;
+
+    @Column(unique = true)
+    private String atmNumber;
+
+    @Column(unique = true)
+    private String pin;
+
+    @Column(nullable = false, unique = true)
+    private String accountType;
+
+    private String nomineeName;
 
     @Column(nullable = false)
     private double balance;
@@ -48,11 +65,6 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime creationDateTime;
 
-    @Column(nullable = false)
-    private String token;
-
-    @OneToMany(mappedBy = "user",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Transaction> transactionList = new ArrayList<>();
 }
