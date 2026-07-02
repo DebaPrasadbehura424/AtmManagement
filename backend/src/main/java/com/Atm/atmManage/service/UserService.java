@@ -31,16 +31,6 @@ public class UserService {
         }
     }
 
-    // Check Aaadhar Exists
-    public boolean checkAadharExistOrNot(String aadharNumber) {
-        try {
-            return userRepository.findByAadharNumber(aadharNumber).isPresent();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return false;
-        }
-    }
-
     // Generate 16-digit Account Number
     public String getAccountNumberFromService() {
         SecureRandom random = new SecureRandom();
@@ -54,14 +44,28 @@ public class UserService {
     }
 
     // Get User By AccountNumber
-    public User getUserByAccountNumber(String accouuntNumber) {
-        return userRepository.findByAccountNumber(accouuntNumber).orElse(null);
+    public User getUserByAccountNumber(String accountNumber) {
+        if (accountNumber == null || accountNumber.trim().isEmpty()) {
+            return null;
+        }
+
+        System.out.println("Service: Searching for account -> [" + accountNumber.trim() + "]");
+
+        User user = userRepository.findUserByAccountNumber(accountNumber.trim());
+
+        if (user != null) {
+            System.out.println("✅ User Found: " + user.getFirstName() + " " + user.getLastName());
+        } else {
+            System.out.println("❌ User NOT Found in DB");
+        }
+
+        return user;
     }
 
     // Get User By Account Number
     public User getUserExitOrNotByaccountNumber(String accountNumber) {
         try {
-            return userRepository.findByAccountNumber(accountNumber.trim()).orElse(null);
+            return userRepository.findUserByAccountNumber(accountNumber.trim());
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return null;

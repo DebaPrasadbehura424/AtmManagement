@@ -1,6 +1,5 @@
 package com.Atm.atmManage.controller;
 
-import com.Atm.atmManage.jwt.JwtTokenProvider;
 import com.Atm.atmManage.model.Otp;
 import com.Atm.atmManage.model.Transaction;
 import com.Atm.atmManage.model.User;
@@ -10,6 +9,8 @@ import com.Atm.atmManage.service.UserService;
 
 import jakarta.mail.MessagingException;
 
+import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -33,11 +34,12 @@ public class UserController {
     @PostMapping("/createAccount")
     public ResponseEntity<String> createAccount(@RequestBody User user) {
         String accountNumber = userService.getAccountNumberFromService();
+        String ifse = userService.getAccountNumberFromService();
         user.setAccountNumber(accountNumber);
-
-        User savedUser = userService.saveUser(user);
-        String token = JwtTokenProvider.generateToken(savedUser.getAccountNumber());
-        return new ResponseEntity<>(token, HttpStatus.CREATED);
+        user.setIfseCode(ifse);
+        user.setCreationDateTime(LocalDateTime.now());
+        userService.saveUser(user);
+        return new ResponseEntity<>("Created successfully", HttpStatus.CREATED);
     }
 
     @PostMapping("/createAtm/{accountNumber}")

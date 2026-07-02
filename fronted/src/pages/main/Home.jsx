@@ -32,7 +32,7 @@ function Home() {
 
   const enterATM = () => {
     playSound();
-    navigate("/atm");
+    navigate("/atm_home");
   };
 
   return (

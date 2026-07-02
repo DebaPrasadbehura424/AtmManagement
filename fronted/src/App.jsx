@@ -2,15 +2,12 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/main/Home";
 import Choose from "./pages/operation/Choose";
-import CreateAtm from "./pages/create/CreateAtm";
 import Atm from "./pages/create/Atm";
-import AadharInput from "./pages/protecter/AadharInput";
 import AtmOprations from "./pages/create/AtmOprations";
 import BalanaceInquery from "./pages/operation/BalanaceInquery";
 import Withdrawal from "./pages/operation/Withdraw";
 import Deposit from "./pages/operation/Deposit";
-import InsertCard from "./pages/operation/InsertCard";
-import Login from "./pages/operation/Login";
+import Login from "./pages/operation/AtmHome";
 import Newpin from "./pages/operation/Newpin";
 import FundTransfer from "./pages/operation/FundTransfer";
 import ChangePin from "./pages/operation/ChangePin";
@@ -20,6 +17,7 @@ import ForgetPassword from "./pages/operation/ForgetPassword";
 import Bank from "./pages/main/Bank";
 import Cashier from "./pages/main/MayIHelpYou";
 import AccountPage from "./pages/operation/AccountPage";
+import AtmHome from "./pages/operation/AtmHome";
 
 function App() {
   return (
@@ -32,8 +30,7 @@ function App() {
       <Route path="/choose" element={<Choose />} />
 
       {/* atm */}
-      <Route path="/insertcard" element={<InsertCard />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/atm_home" element={<AtmHome />} />
       <Route path="/newpin" element={<Newpin />} />
       <Route path="/balanceInquery" element={<BalanaceInquery />} />
       <Route path="/withdraw" element={<Withdrawal />} />
@@ -45,10 +42,7 @@ function App() {
       <Route path="/forgetpassword" element={<ForgetPassword />} />
 
       <Route path="/atm" element={<Atm />} />
-      <Route path="/createatm" element={<CreateAtm />} />
       <Route path="/atmopration" element={<AtmOprations />} />
-
-      <Route path="/aadharInput" element={<AadharInput />} />
     </Routes>
   );
 }

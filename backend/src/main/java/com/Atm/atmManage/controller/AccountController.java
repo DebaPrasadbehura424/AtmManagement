@@ -1,108 +1,230 @@
 package com.Atm.atmManage.controller;
 
-import com.Atm.atmManage.model.Transaction;
-import com.Atm.atmManage.model.User;
-import com.Atm.atmManage.service.UserService;
-import com.Atm.atmManage.vd.TrasactionDto;
-
-import java.time.LocalDateTime;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.Atm.atmManage.model.User;
+import com.Atm.atmManage.service.AccountService;
+import com.Atm.atmManage.service.UserService;
+import com.Atm.atmManage.vd.TrasactionDto;
+import com.Atm.atmManage.vd.UpdateAccountDto;
 
 @RestController
 @RequestMapping("/info")
 public class AccountController {
 
+    private final AccountService accountService;
     private final UserService userService;
-    // we have to mode accoding to that use account number and atm numberbn
 
-    AccountController(UserService userService) {
+    public AccountController(AccountService accountService, UserService userService) {
+        this.accountService = accountService;
         this.userService = userService;
     }
 
+    // ==========================================
+    // Balance Enquiry
+    // ==========================================
+
     @GetMapping("/balanceEnquiry")
-    public ResponseEntity<?> getBalanceEnquiry(@RequestBody TrasactionDto tans) {
+    public ResponseEntity<?> getBalanceEnquiry(@RequestBody TrasactionDto dto) {
+
         try {
-            User newQuiry = userService.getUserByAccountNumber(tans.getAccountNumber());
-            return new ResponseEntity<>(newQuiry.getBalance(), HttpStatus.ACCEPTED);
+
+            Double balance = accountService.balanceEnquiry(dto.getAccountNumber());
+
+            return new ResponseEntity<>(balance, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+
         } catch (Exception e) {
-            System.out.println(e);
-            return null;
+
+            return new ResponseEntity<>("Internal Server Error",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
+
+    @GetMapping("/getAccount/{accountNumber}")
+    public ResponseEntity<?> getAccount(@PathVariable String accountNumber) {
+        System.out.println(accountNumber);
+        try {
+            System.out.println("🔍 Received Account Number: [" + accountNumber + "]");
+
+            if (accountNumber == null || accountNumber.trim().isEmpty()) {
+                return new ResponseEntity<>("Account number cannot be empty", HttpStatus.BAD_REQUEST);
+            }
+
+            User user = userService.getUserByAccountNumber(accountNumber.trim());
+
+            if (user == null) {
+                System.out.println("❌ User not found for account: " + accountNumber);
+                return new ResponseEntity<>("Account Not Found", HttpStatus.NOT_FOUND);
+            }
+
+            System.out.println("✅ User Found: " + user.getFirstName() + " " + user.getLastName());
+            return new ResponseEntity<>(user, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+            System.out.println("Runtime Error: " + e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            System.out.println("Exception: " + e.getMessage());
+            return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    // ==========================================
+    // Deposit
+    // ==========================================
 
     @PatchMapping("/deposit")
-    public ResponseEntity<?> depositMoney(@RequestBody TrasactionDto trans) {
+    public ResponseEntity<?> deposit(@RequestBody TrasactionDto dto) {
 
         try {
-            User currentUser = userService.getUserByAccountNumber(trans.getAccountNumber());
-            if (currentUser == null) {
-                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
-            }
 
-            List<Transaction> transactionList = currentUser.getTransactionList();
-            if (transactionList == null) {
-                transactionList = new ArrayList<>();
-            }
+            Double balance = accountService.deposit(dto);
 
-            double oldBlance = currentUser.getBalance();
-            double newDeposit = trans.getTransactionAmount();
-            currentUser.setBalance(oldBlance + newDeposit);
+            return new ResponseEntity<>(balance, HttpStatus.OK);
 
-            transactionList.add(new Transaction("Deposit", trans.getMode(), newDeposit, LocalDateTime.now()));
-            currentUser.setTransactionList(transactionList);
-            userService.saveUser(currentUser);
+        } catch (RuntimeException e) {
 
-            return new ResponseEntity<>(currentUser.getBalance(), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
+            return new ResponseEntity<>("Internal Server Error",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
 
-    @PatchMapping("/withdraw/{accountNumber}/{withdrawUser}/{mode}")
-    public ResponseEntity<?> withdrawMoney(@PathVariable String accountNumber, @PathVariable Double withdrawUser,
+    // ==========================================
+    // Withdraw
+    // ==========================================
+
+    @PatchMapping("/withdraw/{accountNumber}/{amount}/{mode}")
+    public ResponseEntity<?> withdraw(@PathVariable String accountNumber,
+            @PathVariable Double amount,
             @PathVariable String mode) {
+
         try {
-            User currentUser = userService.getUserByAccountNumber(accountNumber);
 
-            if (currentUser == null) {
-                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
-            }
-            double oldBlance = currentUser.getBalance();
-            double newDeposit = withdrawUser;// with draw
-            if (newDeposit == 0) {
-                return new ResponseEntity<>("Enter valid amount", HttpStatus.NOT_ACCEPTABLE);
-            }
-            if (newDeposit % 100 != 0) {
-                return new ResponseEntity<>("Enter valid amount", HttpStatus.NOT_ACCEPTABLE);
-            }
+            Double balance = accountService.withdraw(accountNumber, amount, mode);
 
-            List<Transaction> transactionList = currentUser.getTransactionList();
-            if (transactionList == null) {
-                transactionList = new ArrayList<>();
-            }
-            if (newDeposit <= oldBlance && oldBlance != 0) {
-                currentUser.setBalance(oldBlance - newDeposit);
+            return new ResponseEntity<>(balance, HttpStatus.OK);
 
-                transactionList.add(new Transaction("WithDraw", mode, newDeposit, LocalDateTime.now()));
-                userService.saveUser(currentUser);
-                return new ResponseEntity<>(currentUser.getBalance(), HttpStatus.ACCEPTED);
-            } else {
-                return new ResponseEntity<>("You have not that much money", HttpStatus.NOT_ACCEPTABLE);
-            }
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
+            return new ResponseEntity<>("Internal Server Error",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    // ==========================================
+    // Update ATM PIN
+    // ==========================================
+
+    @PatchMapping("/update-pin/{atmNumber}/{newPin}")
+    public ResponseEntity<?> updatePin(@PathVariable String atmNumber,
+            @PathVariable String newPin) {
+
+        try {
+
+            String message = accountService.updateAtmPin(atmNumber, newPin);
+
+            return new ResponseEntity<>(message, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+
+        } catch (Exception e) {
+
+            return new ResponseEntity<>("Internal Server Error",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    // ==========================================
+    // Update Account Details
+    // ==========================================
+
+    @PatchMapping("/update-account/{accountNumber}")
+    public ResponseEntity<?> updateAccount(@PathVariable String accountNumber,
+            @RequestBody UpdateAccountDto dto) {
+
+        try {
+
+            User user = accountService.updateAccount(accountNumber, dto);
+
+            return new ResponseEntity<>(user, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+
+        } catch (Exception e) {
+
+            return new ResponseEntity<>("Internal Server Error",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    // ==========================================
+    // Delete ATM
+    // ==========================================
+
+    @DeleteMapping("/delete-atm/{atmNumber}")
+    public ResponseEntity<?> deleteAtm(@PathVariable String atmNumber) {
+
+        try {
+
+            String message = accountService.deleteAtm(atmNumber);
+
+            return new ResponseEntity<>(message, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+
+        } catch (Exception e) {
+
+            return new ResponseEntity<>("Internal Server Error",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    // ==========================================
+    // Delete Account
+    // ==========================================
+
+    @DeleteMapping("/delete-account/{accountNumber}")
+    public ResponseEntity<?> deleteAccount(@PathVariable String accountNumber) {
+
+        try {
+
+            String message = accountService.deleteAccount(accountNumber);
+
+            return new ResponseEntity<>(message, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+
+        } catch (Exception e) {
+
+            return new ResponseEntity<>("Internal Server Error",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }

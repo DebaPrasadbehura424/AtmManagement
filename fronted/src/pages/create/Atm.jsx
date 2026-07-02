@@ -1,214 +1,233 @@
-import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2"; // Import Swal for alerts
+import React, { useState } from "react";
+import Swal from "sweetalert2";
 import axios from "axios";
 import fail from "../audios/fail.mp3";
 import success from "../audios/success.mp3";
 import { useNavigate } from "react-router-dom";
 
-function Atm() {
-  const [userData, setUserData] = useState(null);
-  const [aadharNumber, setAadharNumber] = useState(
-    localStorage.getItem("aadharNum")
-  );
-  const [error, setError] = useState("");
-  const navigate = useNavigate(null);
+function Atm({
+  setAccountNumber,
+  accountNumber,
+  handleCreateATM,
+  formData,
+  setFormData,
+}) {
+  const [step, setStep] = useState("accountInput");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!aadharNumber) {
-        setError("Aadhar number is required.");
-        return;
-      }
-
-      try {
-        const response = await axios.get(
-          `http://localhost:8080/user/aadharNumber/${aadharNumber}`
-        );
-
-        if (response.status === 200) {
-          new Audio(success).play();
-          Swal.fire({
-            icon: "success",
-            title: "Success!",
-            text: "Aadhar Clarification Successful!",
-            confirmButtonColor: "#3085d6",
-          }).then(() => {
-            setUserData(response.data);
-          });
-        } else {
-          new Audio(fail).play();
-          Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "Invalid Aadhar number. Please check with the bank.",
-          });
-        }
-      } catch (error) {
-        new Audio(fail).play();
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "An error occurred. Please try again later.",
-        });
-      }
-    };
-
-    fetchData();
-  }, [aadharNumber]);
-
-  const handleSendEmail = async () => {
-    if (!userData) {
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "User data is not available. Please try again later.",
-      });
+  const fetchAccountDetails = async () => {
+    if (!accountNumber.trim()) {
+      Swal.fire("Warning", "Please enter account number", "warning");
       return;
     }
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ATM Email</title>
-        <style>
-          body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(to right, #ff7e5f, #feb47b);
-            padding: 20px;
-            color: white;
-          }
-          .card {
-            background: linear-gradient(to right, #6a11cb, #2575fc);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            padding: 30px;
-            max-width: 500px;
-            margin: 0 auto;
-            position: relative;
-          }
-          .card::before {
-            content: "";
-            position: absolute;
-            top: -20px;
-            left: -20px;
-            right: -20px;
-            bottom: -20px;
-            border: 2px solid #fff;
-            border-radius: 14px;
-            z-index: -1;
-            background: rgba(255, 255, 255, 0.1);
-          }
-          .account-number {
-            font-family: 'Courier New', Courier, monospace;
-            color: #ffffff;
-            font-size: 28px;
-            letter-spacing: 2px;
-            margin-top: 20px;
-            text-align: center;
-          }
-          .heads{
-            color: #ff0000;
-            font-size: 20px;
-            margin-top: 5px;
-            text-align: center;
-            }
-          .user-info {
-            color: #ffffff;
-            font-size: 20px;
-            margin-top: 20px;
-            text-align: center;
-          }
-          .date {
-            color: #ffffff;
-            font-size: 18px;
-            text-align: center;
-            margin-top: 10px;
-            font-style: italic;
-          }
-          .footer {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(to right, #ff7e5f, #feb47b);
-            border-radius: 0 0 12px 12px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="card">
-           <h3 class="heads">SCOTIA BANK ATM</h3>
-
-
-          <div class="account-number">
-            ${userData.accountNumber.substring(
-              0,
-              4
-            )} ${userData.accountNumber.substring(
-      4,
-      8
-    )} ${userData.accountNumber.substring(
-      8,
-      12
-    )} ${userData.accountNumber.substring(12, 16)}
-          </div>
-          <div class="user-info">
-            ${userData.firstName} ${userData.lastName}
-          </div>
-          <div class="date">
-            Created At: ${userData.creationDateTime.substring(0, 10)}
-          </div>
-          <div class="footer"></div>
-        </div>
-      </body>
-      </html>
-    `;
+    setLoading(true);
 
     try {
-      const emailData = {
-        to: userData.email,
-        subject: "ATM Card Information",
-        body: htmlContent,
-      };
+      const response = await axios.get(
+        `http://localhost:8080/info/getAccount/${accountNumber}`,
+      );
 
-      const response = await axios
-        .post("http://localhost:8080/api/email/send", emailData)
-        .then((res) => {
-          if (res.status === 200) {
-            Swal.fire({
-              icon: "success",
-              title: "Email Sent",
-              text: "The email has been sent successfully!",
-            });
-            navigate("/login");
-          }
-        });
-    } catch (error) {
-      console.error("Error sending email:", error);
+      const user = response.data;
+
+      setFormData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        dob: user.dob || "",
+        email: user.email || "",
+        phoneNumber: user.phoneNumber || "",
+        address: user.address || "",
+        nomineeName: user.nomineeName || "",
+        panNumber: user.panNumber || "",
+        aadhaarNumber: user.aadhaarNumber || "",
+        accountType: user.accountType?.toLowerCase() || "savings",
+      });
+
+      setStep("editForm");
+
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Account details loaded successfully.",
+        timer: 2000,
+      });
+    } catch (err) {
+      console.error("Full Error:", err);
+
+      let errorMsg = "Account Not Found";
+
+      if (err.response) {
+        if (err.response.status === 404) {
+          errorMsg = err.response.data || "Account does not exist";
+        } else if (err.response.status === 500) {
+          errorMsg = "Internal Server Error";
+        }
+      } else if (err.request) {
+        errorMsg = "Cannot connect to server. Is backend running?";
+      }
+
       Swal.fire({
         icon: "error",
-        title: "Failed to Send Email",
-        text: "There was an error sending the email. Please try again later.",
+        title: "Failed to Load Account",
+        text: errorMsg,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") fetchAccountDetails();
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <button
-        onClick={handleSendEmail}
-        disabled={!userData}
-        className="bg-gradient-to-r from-green-400
-         to-blue-500 text-white py-6 px-10 rounded-xl shadow-xl
-          hover:from-blue-500 hover:to-green-400 text-3xl font-semibold 
-          transform transition duration-300 ease-in-out hover:scale-105 cursor-pointer"
-      >
-        Send Email
-      </button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden mb-8">
+          <div className="bg-[#002b5c] text-white px-8 py-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-3xl font-bold text-[#002b5c]">
+                A
+              </div>
+              <div>
+                <h1 className="text-3xl font-semibold tracking-tight">
+                  ABC BANK
+                </h1>
+                <p className="text-blue-200 text-sm">
+                  Trusted Banking Since 1952
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-sm opacity-75">ATM Card Issuance</div>
+            </div>
+          </div>
+
+          {/* Step Indicator */}
+          <div className="px-8 py-4 bg-slate-50 border-b flex items-center gap-3">
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${step === "accountInput" ? "bg-[#002b5c] text-white" : "bg-green-100 text-green-700"}`}
+            >
+              1
+            </div>
+            <div className="h-0.5 flex-1 bg-slate-200" />
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${step === "atmPreview" ? "bg-[#002b5c] text-white" : "bg-slate-200 text-slate-400"}`}
+            >
+              2
+            </div>
+            <p className="ml-3 font-medium text-slate-600">
+              {step === "accountInput" ? "Verify Account" : "ATM Card Preview"}
+            </p>
+          </div>
+
+          <div className="p-8">
+            {step === "accountInput" ? (
+              /* ==================== ACCOUNT INPUT ==================== */
+              <div className="max-w-md mx-auto text-center py-12">
+                <div className="text-6xl mb-6">🏧</div>
+                <h2 className="text-3xl font-semibold text-slate-800 mb-3">
+                  Issue New ATM Card
+                </h2>
+                <p className="text-slate-600 mb-8">
+                  Enter your account number to proceed
+                </p>
+
+                <input
+                  type="text"
+                  value={accountNumber}
+                  onChange={(e) => setAccountNumber(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Enter Account Number"
+                  className="w-full px-6 py-4 text-lg border-2 border-slate-300 rounded-xl focus:outline-none focus:border-[#002b5c] text-center tracking-widest mb-6"
+                />
+
+                <button
+                  onClick={fetchAccountDetails}
+                  disabled={loading}
+                  className="w-full py-4 bg-[#002b5c] hover:bg-[#001f44] text-white font-semibold rounded-xl transition-all disabled:opacity-70 text-lg"
+                >
+                  {loading ? "Fetching..." : "Fetch Account Details"}
+                </button>
+              </div>
+            ) : (
+              /* ==================== ATM PREVIEW ==================== */
+              <div className="space-y-10">
+                <div className="text-center">
+                  <h2 className="text-3xl font-bold text-slate-800 mb-2">
+                    Your ATM Card Preview
+                  </h2>
+                  <p className="text-slate-600">
+                    This is how your card will look
+                  </p>
+                </div>
+
+                {/* Realistic ATM Card Display */}
+                <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
+                  {/* Front */}
+                  <div
+                    className="atm-card front w-full max-w-[380px] h-[240px] rounded-2xl p-6 relative shadow-2xl"
+                    style={{
+                      background: "linear-gradient(135deg, #1e3a8a, #3b82f6)",
+                    }}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="text-2xl font-bold">ABC BANK</div>
+                      <div className="text-xs bg-white/20 px-3 py-1 rounded">
+                        VISA
+                      </div>
+                    </div>
+
+                    <div className="mt-10 w-16 h-12 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-lg shadow-inner" />
+
+                    <div className="mt-5 text-2xl font-mono tracking-widest">
+                      {accountNumber}
+                    </div>
+
+                    <div className="absolute bottom-6 left-6 text-sm uppercase">
+                      {formData?.firstName} {formData?.lastName}
+                    </div>
+                    <div className="absolute bottom-6 right-6 text-sm">
+                      12/29
+                    </div>
+                  </div>
+
+                  {/* Back */}
+                  <div
+                    className="atm-card back w-full max-w-[380px] h-[240px] rounded-2xl p-6 relative shadow-2xl overflow-hidden"
+                    style={{
+                      background: "linear-gradient(135deg, #1e2937, #475569)",
+                    }}
+                  >
+                    <div className="h-12 bg-black w-full absolute top-8" />
+                    <div className="mt-24 text-center text-white/80 text-sm leading-relaxed">
+                      For assistance call
+                      <br />
+                      <span className="font-mono text-lg">
+                        1800-ABC-BANK (1800-222-265)
+                      </span>
+                    </div>
+                    <div className="absolute bottom-6 left-6 text-xs text-white/60">
+                      ABC Bank • Authorized Signature
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center pt-6">
+                  <button
+                    onClick={handleCreateATM}
+                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-xl font-semibold py-5 px-16 rounded-2xl shadow-xl transition transform hover:scale-105"
+                  >
+                    Create ATM Card & Send Email
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
