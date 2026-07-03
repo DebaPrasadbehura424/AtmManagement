@@ -55,37 +55,32 @@ function AtmHome() {
       case "oprationBoard":
         return (
           <div className="h-full flex flex-col justify-center items-center px-6 py-4">
-            <h2 className="text-3xl font-bold text-white mb-8">
-              Select Transaction
-            </h2>
-
             <div className="grid grid-cols-2 gap-5 w-full max-w-2xl">
-              <button className="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-4 rounded-lg shadow-lg transition">
-                💰 Balance Inquiry
+              <button
+                className="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold p-2 rounded-lg shadow-lg transition"
+                onClick={handleOpration}
+              >
+                Balance Inquiry
               </button>
 
-              <button className="bg-green-600 hover:bg-green-700 text-white font-semibold py-4 rounded-lg shadow-lg transition">
-                💵 Cash Withdrawal
+              <button className="bg-green-600 hover:bg-green-700 text-white font-semibold p-2 rounded-lg shadow-lg transition">
+                Cash Withdrawal
               </button>
 
-              <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-lg shadow-lg transition">
-                💳 Deposit Cash
+              <button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold p-2 rounded-lg shadow-lg transition">
+                Fund Transfer
               </button>
 
-              <button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 rounded-lg shadow-lg transition">
-                🔄 Fund Transfer
+              <button className="bg-pink-600 hover:bg-pink-700 text-white font-semibold p-2 rounded-lg shadow-lg transition">
+                Change PIN
               </button>
 
-              <button className="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-4 rounded-lg shadow-lg transition">
-                🔐 Change PIN
+              <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold p-2 rounded-lg shadow-lg transition">
+                Card Details
               </button>
 
-              <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 rounded-lg shadow-lg transition">
-                💳 Card Details
-              </button>
-
-              <button className="bg-red-600 hover:bg-red-700 text-white font-semibold py-4 rounded-lg shadow-lg transition">
-                ❌ Exit
+              <button className="bg-red-600 hover:bg-red-700 text-white font-semibold p-2 rounded-lg shadow-lg transition">
+                Exit
               </button>
             </div>
           </div>
@@ -210,7 +205,7 @@ function AtmHome() {
           });
       } else if (operation == "enterPin") {
         await axios
-          .patch(`http://localhost:8080/info/cheak-pin/${accountNumber}/${pin}`)
+          .get(`http://localhost:8080/info/cheak-pin/${accountNumber}/${pin}`)
           .then(() => {
             setOperation("oprationBoard");
           })

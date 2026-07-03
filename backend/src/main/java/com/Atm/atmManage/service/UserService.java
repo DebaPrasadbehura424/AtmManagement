@@ -89,4 +89,22 @@ public class UserService {
         }
     }
 
+    public User getUserByAtmNumber(String atmNumber) {
+        if (atmNumber == null || atmNumber.trim().isEmpty()) {
+            return null;
+        }
+
+        System.out.println("Service: Searching for account -> [" + atmNumber.trim() + "]");
+
+        User user = userRepository.findUserByAtmNumber(atmNumber.trim());
+
+        if (user != null) {
+            System.out.println("✅ User Found: " + user.getFirstName() + " " + user.getLastName());
+        } else {
+            System.out.println("❌ User NOT Found in DB");
+        }
+
+        return user;
+    }
+
 }

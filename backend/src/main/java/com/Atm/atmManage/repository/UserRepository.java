@@ -13,4 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByAtmNumber(String atmNumber);
 
+    User findUserByAtmNumber(String trim);
+
 }

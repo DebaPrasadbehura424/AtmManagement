@@ -162,12 +162,16 @@ public class AccountController {
 
     @GetMapping("/cheak-pin/{atmNumber}/{pin}")
     public ResponseEntity<?> checkPin(@PathVariable String atmNumber,
-            @PathVariable String newPin) {
+            @PathVariable String pin) {
+
+        System.out.println(pin);
+        System.out.println(pin.getClass());
 
         try {
             // for now we use account number later i will update ok
-            User user = userService.getUserByAccountNumber(atmNumber);
-            if (!user.getPin().equals(newPin)) {
+            User user = userService.getUserByAtmNumber(atmNumber);
+
+            if (!user.getPin().equals(pin)) {
                 return new ResponseEntity<>("Pin Mismatch", HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>(user, HttpStatus.OK);
@@ -178,7 +182,7 @@ public class AccountController {
 
         } catch (Exception e) {
 
-            return new ResponseEntity<>("Internal Server Error",
+            return new ResponseEntity<>(e.getMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
