@@ -1,0 +1,30 @@
+
+frontend
+
+one wrong here in atm  instead of atm number i write account number update that ok 
+
+
+
+backend and many more
+
+    @GetMapping("/cheak-pin/{atmNumber}/{pin}")
+    public ResponseEntity<?> checkPin(@PathVariable String atmNumber,
+            @PathVariable String newPin) {
+
+        try {
+            //  for now we use account number later i will update ok 
+            User user = userService.getUserByAccountNumber(atmNumber);
+
+            return new ResponseEntity<>(message, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+
+        } catch (Exception e) {
+
+            return new ResponseEntity<>("Internal Server Error",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }

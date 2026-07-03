@@ -75,6 +75,35 @@ public class AccountController {
             return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PatchMapping("/getAtm/{accountNumber}")
+    public ResponseEntity<?> getAtm(@PathVariable String accountNumber) {
+        System.out.println("Account number" + accountNumber);
+        try {
+
+            if (accountNumber == null || accountNumber.trim().isEmpty()) {
+                return new ResponseEntity<>("Account number cannot be empty", HttpStatus.BAD_REQUEST);
+            }
+
+            User user = userService.getUserByAccountNumber(accountNumber.trim());
+
+            System.out.println(user);
+
+            if (user == null) {
+                System.out.println("❌ User not found for account: " + accountNumber);
+                return new ResponseEntity<>("Account Not Found", HttpStatus.NOT_FOUND);
+            }
+            String atmNumber = userService.getAccountNumberFromService();
+            user.setAtmNumber(atmNumber);
+            userService.saveUser(user);
+
+            return new ResponseEntity<>(user, HttpStatus.OK);
+
+        } catch (Exception e) {
+            System.out.println("Exception: " + e.getMessage());
+            return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     // ==========================================
     // Deposit
     // ==========================================
@@ -131,9 +160,36 @@ public class AccountController {
     // Update ATM PIN
     // ==========================================
 
+    @GetMapping("/cheak-pin/{atmNumber}/{pin}")
+    public ResponseEntity<?> checkPin(@PathVariable String atmNumber,
+            @PathVariable String newPin) {
+
+        try {
+            // for now we use account number later i will update ok
+            User user = userService.getUserByAccountNumber(atmNumber);
+            if (!user.getPin().equals(newPin)) {
+                return new ResponseEntity<>("Pin Mismatch", HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(user, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+
+        } catch (Exception e) {
+
+            return new ResponseEntity<>("Internal Server Error",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
     @PatchMapping("/update-pin/{atmNumber}/{newPin}")
     public ResponseEntity<?> updatePin(@PathVariable String atmNumber,
             @PathVariable String newPin) {
+
+        System.out.println(atmNumber);
+        System.out.println(newPin);
 
         try {
 

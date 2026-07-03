@@ -25,8 +25,8 @@ function Atm({
     setLoading(true);
 
     try {
-      const response = await axios.get(
-        `http://localhost:8080/info/getAccount/${accountNumber}`,
+      const response = await axios.patch(
+        `http://localhost:8080/info/getAtm/${accountNumber}`,
       );
 
       const user = response.data;
@@ -41,6 +41,7 @@ function Atm({
         nomineeName: user.nomineeName || "",
         panNumber: user.panNumber || "",
         aadhaarNumber: user.aadhaarNumber || "",
+        atmNumber: user.atmNumber || "",
         accountType: user.accountType?.toLowerCase() || "savings",
       });
 
@@ -183,7 +184,7 @@ function Atm({
                     <div className="mt-10 w-16 h-12 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-lg shadow-inner" />
 
                     <div className="mt-5 text-2xl font-mono tracking-widest">
-                      {accountNumber}
+                      {formData.atmNumber}
                     </div>
 
                     <div className="absolute bottom-6 left-6 text-sm uppercase">

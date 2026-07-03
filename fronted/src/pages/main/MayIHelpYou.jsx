@@ -30,6 +30,7 @@ function MayIHelpYou() {
     email: "",
     phoneNumber: "",
     address: "",
+    atmNumber: "",
     panNumber: "",
     aadhaarNumber: "",
     accountType: "savings",
@@ -292,7 +293,7 @@ function MayIHelpYou() {
               <div class="bank-name">ABC BANK</div>
               <div class="chip"></div>
               <div class="card-number">
-                ${accountNumber.substring(0, 4)} ${accountNumber.substring(4, 8)} ${accountNumber.substring(8, 12)} ${accountNumber.substring(12)}
+                ${formData.atmNumber.substring(0, 4)} ${formData.atmNumber.substring(4, 8)} ${formData.atmNumber.substring(8, 12)} ${formData.atmNumber.substring(12)}
               </div>
               <div class="card-holder">${formData.firstName} ${formData.lastName}</div>
               <div class="expiry">VALID THRU 12/29</div>
