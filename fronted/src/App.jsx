@@ -5,9 +5,10 @@ import Atm from "./pages/create/Atm";
 import AtmOprations from "./pages/create/AtmOprations";
 import TransactionHistory from "./pages/transaction/TrsactionHistory";
 import Bank from "./pages/main/Bank";
-import Cashier from "./pages/main/MayIHelpYou";
+import MayIHelpYou from "./pages/main/MayIHelpYou";
 import AccountPage from "./pages/operation/AccountPage";
 import AtmHome from "./pages/operation/AtmHome";
+import Cashier from "./pages/main/Cashier";
 
 function App() {
   return (
@@ -15,7 +16,8 @@ function App() {
       <Route path="/" element={<Home />} />
       {/* bank  */}
       <Route path="/bank" element={<Bank />} />
-      <Route path="/MAY I HELP YOU?" element={<Cashier />} />
+      <Route path="/MAY I HELP YOU?" element={<MayIHelpYou />} />
+      <Route path="/CASHIER" element={<Cashier/>} />
       <Route path="/accountPage" element={<AccountPage />} />
 
       {/* atm */}

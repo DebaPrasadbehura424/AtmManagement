@@ -36,7 +36,9 @@ public class Transaction {
             String mode,
             Double transactionAmount,
             LocalDateTime transactionDate) {
+
         this.transactionType = transactionType;
+        this.mode = mode;
         this.transactionAmount = transactionAmount;
         this.transactionDate = transactionDate;
     }
